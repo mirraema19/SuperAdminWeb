@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { type AxiosInstance } from 'axios';
 
 // Base URLs de los servicios
 const AUTH_BASE_URL = 'https://auth-service-autogiad.onrender.com';
@@ -21,7 +21,7 @@ export const workshopClient = axios.create({
 });
 
 // Interceptor para agregar el token a las peticiones
-const addAuthInterceptor = (client: typeof axios) => {
+const addAuthInterceptor = (client: AxiosInstance) => {
     client.interceptors.request.use(
         (config) => {
             const token = localStorage.getItem('token');
@@ -39,7 +39,7 @@ addAuthInterceptor(authClient);
 addAuthInterceptor(workshopClient);
 
 // Interceptor para manejar errores globalmente
-const addErrorInterceptor = (client: typeof axios) => {
+const addErrorInterceptor = (client: AxiosInstance) => {
     client.interceptors.response.use(
         (response) => response,
         (error) => {
