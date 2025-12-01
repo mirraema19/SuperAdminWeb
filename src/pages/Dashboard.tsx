@@ -15,14 +15,29 @@ export default function Dashboard() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+    // Función auxiliar para extraer el array de la respuesta, sea cual sea la estructura
+    const extractArrayFromResponse = (data: any): Workshop[] => {
+        if (Array.isArray(data)) return data;
+        if (data && Array.isArray(data.data)) return data.data;
+        if (data && Array.isArray(data.workshops)) return data.workshops;
+        if (data && Array.isArray(data.items)) return data.items;
+        return [];
+    };
+
     // Cargar talleres pendientes
     const loadPendingWorkshops = async () => {
         setLoading(true);
         setError('');
         try {
-            const response = await workshopClient.get<Workshop[]>('/admin/pending');
-            setPendingWorkshops(response.data);
+            // Usamos <any> para poder inspeccionar la respuesta sin errores de TS
+            const response = await workshopClient.get<any>('/admin/pending');
+            
+            console.log("📦 PENDIENTES RAW:", response.data); // Debug en consola
+
+            const data = extractArrayFromResponse(response.data);
+            setPendingWorkshops(data);
         } catch (err: any) {
+            console.error("Error cargando pendientes:", err);
             setError(err.response?.data?.message || 'Error al cargar talleres pendientes');
         } finally {
             setLoading(false);
@@ -34,11 +49,18 @@ export default function Dashboard() {
         setLoading(true);
         setError('');
         try {
-            const response = await workshopClient.get<Workshop[]>('/');
-            // Filtrar solo los aprobados
-            const approved = response.data.filter((w) => w.isApproved);
+            // NOTA: Dejamos comillas vacías '' para no duplicar la barra /workshops/
+            const response = await workshopClient.get<any>(''); 
+            
+            console.log("📦 ACTIVOS RAW:", response.data); // Debug en consola
+
+            const data = extractArrayFromResponse(response.data);
+            
+            // Filtrar solo los aprobados si es necesario, o usar todos si el backend ya filtra
+            const approved = data.filter((w) => w.isApproved);
             setActiveWorkshops(approved);
         } catch (err: any) {
+            console.error("Error cargando activos:", err);
             setError(err.response?.data?.message || 'Error al cargar talleres activos');
         } finally {
             setLoading(false);

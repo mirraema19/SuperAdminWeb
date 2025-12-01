@@ -26,7 +26,10 @@ const addAuthInterceptor = (client: AxiosInstance) => {
         (config) => {
             const token = localStorage.getItem('token');
             if (token) {
+                console.log('Adding token to request:', config.url);
                 config.headers.Authorization = `Bearer ${token}`;
+            } else {
+                console.warn('No token found for request:', config.url);
             }
             return config;
         },
@@ -45,9 +48,9 @@ const addErrorInterceptor = (client: AxiosInstance) => {
         (error) => {
             if (error.response?.status === 401) {
                 // Token inválido o expirado
-                localStorage.removeItem('token');
-                localStorage.removeItem('role');
-                window.location.href = '/login';
+                //localStorage.removeItem('token');
+                //localStorage.removeItem('role');
+                //window.location.href = '/login';
             }
             return Promise.reject(error);
         }

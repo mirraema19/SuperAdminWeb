@@ -15,6 +15,16 @@ export default function WorkshopTable({
     showActions = false,
     loading = false,
 }: WorkshopTableProps) {
+    
+    // --- PROTECCIÓN CONTRA PANTALLA BLANCA ---
+    // Si 'workshops' llega como undefined, null o un objeto, lo forzamos a ser un array vacío.
+    const safeWorkshops = Array.isArray(workshops) ? workshops : [];
+    
+    if (!Array.isArray(workshops)) {
+        console.warn("⚠️ WorkshopTable recibió datos inválidos (no es un array). Se usará lista vacía.", workshops);
+    }
+    // -----------------------------------------
+
     if (loading) {
         return (
             <div className="flex justify-center items-center py-12">
@@ -26,7 +36,7 @@ export default function WorkshopTable({
         );
     }
 
-    if (workshops.length === 0) {
+    if (safeWorkshops.length === 0) {
         return (
             <div className="text-center py-12">
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +78,7 @@ export default function WorkshopTable({
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                    {workshops.map((workshop) => (
+                    {safeWorkshops.map((workshop) => (
                         <tr key={workshop.id} className="hover:bg-gray-50 transition-colors">
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm font-medium text-gray-900">{workshop.name}</div>

@@ -2,7 +2,6 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authClient } from '../api/apiClient';
 import { setAuth } from '../utils/auth';
-import type { LoginResponse } from '../types';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -17,27 +16,43 @@ export default function Login() {
         setLoading(true);
 
         try {
-            const response = await authClient.post<LoginResponse>('/auth/login', {
+            // Usamos <any> aquí para adaptarnos a la estructura real de tu backend
+            // sin que TypeScript se queje si no has actualizado types.ts
+            const response = await authClient.post<any>('/auth/login', {
                 email,
                 password,
             });
 
-            const { access_token, user } = response.data;
+            console.log("🔍 DATOS RECIBIDOS DEL BACKEND:", response.data);
 
-            // Validar que el usuario sea SYSTEM_ADMIN
-            if (user.role !== 'SYSTEM_ADMIN') {
+            // --- CORRECCIÓN CLAVE ---
+            // Tu backend devuelve: { tokens: { accessToken: "..." }, user: { ... } }
+            const { tokens, user } = response.data;
+            const accessToken = tokens?.accessToken;
+
+            // 1. Validar que el token exista realmente
+            if (!accessToken) {
+                console.error("❌ Estructura inesperada. Se recibió:", response.data);
+                throw new Error("Error interno: El servidor no devolvió el token en la ruta esperada (tokens.accessToken).");
+            }
+
+            // 2. Validar que el usuario sea SYSTEM_ADMIN
+            if (user?.role !== 'SYSTEM_ADMIN') {
                 setError('Acceso denegado. Solo usuarios SYSTEM_ADMIN pueden acceder a este panel.');
                 setLoading(false);
                 return;
             }
 
-            // Guardar token y rol
-            setAuth(access_token, user.role);
+            // 3. Guardar token CORRECTO y rol en LocalStorage
+            setAuth(accessToken, user.role);
 
-            // Redireccionar al dashboard
+            // 4. Redireccionar al dashboard
             navigate('/dashboard');
+
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Error de autenticación. Verifica tus credenciales.');
+            console.error("Error en Login:", err);
+            const mensajeError = err.response?.data?.message || err.message || 'Error de autenticación. Verifica tus credenciales.';
+            setError(mensajeError);
         } finally {
             setLoading(false);
         }
