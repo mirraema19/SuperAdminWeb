@@ -15,15 +15,8 @@ export default function WorkshopTable({
     showActions = false,
     loading = false,
 }: WorkshopTableProps) {
-    
-    // --- PROTECCIÓN CONTRA PANTALLA BLANCA ---
-    // Si 'workshops' llega como undefined, null o un objeto, lo forzamos a ser un array vacío.
+    // Seguridad: Asegurar que workshops sea un array para evitar errores
     const safeWorkshops = Array.isArray(workshops) ? workshops : [];
-    
-    if (!Array.isArray(workshops)) {
-        console.warn("⚠️ WorkshopTable recibió datos inválidos (no es un array). Se usará lista vacía.", workshops);
-    }
-    // -----------------------------------------
 
     if (loading) {
         return (
@@ -78,56 +71,61 @@ export default function WorkshopTable({
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                    {safeWorkshops.map((workshop) => (
-                        <tr key={workshop.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">{workshop.name}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                                <div className="text-sm text-gray-900">{workshop.address}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">{workshop.phone}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">{workshop.email || '-'}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                                <div className="flex flex-wrap gap-1">
-                                    {workshop.specialties && workshop.specialties.length > 0 ? (
-                                        workshop.specialties.map((specialty, index) => (
-                                            <span
-                                                key={index}
-                                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
-                                            >
-                                                {specialty}
-                                            </span>
-                                        ))
-                                    ) : (
-                                        <span className="text-sm text-gray-500">-</span>
-                                    )}
-                                </div>
-                            </td>
-                            {showActions && (
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div className="flex justify-end gap-2">
-                                        <button
-                                            onClick={() => onApprove?.(workshop.id)}
-                                            className="btn-success text-sm py-1 px-3"
-                                        >
-                                            Aprobar
-                                        </button>
-                                        <button
-                                            onClick={() => onReject?.(workshop.id)}
-                                            className="btn-danger text-sm py-1 px-3"
-                                        >
-                                            Rechazar
-                                        </button>
+                    {safeWorkshops.map((workshop) => {
+                        // Construir dirección completa desde los campos separados
+                        const fullAddress = `${workshop.street}, ${workshop.city}, ${workshop.state} ${workshop.zipCode}`;
+
+                        return (
+                            <tr key={workshop.id} className="hover:bg-gray-50 transition-colors">
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm font-medium text-gray-900">{workshop.businessName}</div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="text-sm text-gray-900">{fullAddress}</div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-900">{workshop.phone}</div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-900">{workshop.email || '-'}</div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="flex flex-wrap gap-1">
+                                        {workshop.specialties && workshop.specialties.length > 0 ? (
+                                            workshop.specialties.map((specialty) => (
+                                                <span
+                                                    key={specialty.id}
+                                                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
+                                                >
+                                                    {specialty.specialtyType}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="text-sm text-gray-500">-</span>
+                                        )}
                                     </div>
                                 </td>
-                            )}
-                        </tr>
-                    ))}
+                                {showActions && (
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div className="flex justify-end gap-2">
+                                            <button
+                                                onClick={() => onApprove?.(workshop.id)}
+                                                className="btn-success text-sm py-1 px-3"
+                                            >
+                                                Aprobar
+                                            </button>
+                                            <button
+                                                onClick={() => onReject?.(workshop.id)}
+                                                className="btn-danger text-sm py-1 px-3"
+                                            >
+                                                Rechazar
+                                            </button>
+                                        </div>
+                                    </td>
+                                )}
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>

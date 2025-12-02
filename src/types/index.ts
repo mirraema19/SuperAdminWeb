@@ -6,20 +6,39 @@ export interface User {
     phone?: string;
 }
 
+export interface WorkshopSpecialty {
+    id: string;
+    workshopId: string;
+    specialtyType: string;
+    description: string | null;
+    yearsOfExperience: number | null;
+    createdAt: Date;
+}
+
 export interface Workshop {
     id: string;
-    name: string;
-    description?: string;
-    address: string;
-    phone: string;
-    email?: string;
-    latitude?: number;
-    longitude?: number;
-    isApproved: boolean;
     ownerId: string;
-    createdAt: string;
-    updatedAt: string;
-    specialties?: string[];
+    businessName: string;
+    description: string | null;
+    phone: string;
+    email: string | null;
+    website: string | null;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+    latitude: number;
+    longitude: number;
+    priceRange: string;
+    overallRating: number;
+    totalReviews: number;
+    photoUrls: string[];
+    isApproved: boolean;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    specialties?: WorkshopSpecialty[];
     schedule?: WorkshopSchedule[];
 }
 
@@ -30,7 +49,12 @@ export interface WorkshopSchedule {
 }
 
 export interface LoginResponse {
-    access_token: string;
+    // Ajustado a la estructura real de tu backend
+    tokens: {
+        accessToken: string;
+        refreshToken: string;
+        expiresIn: number;
+    };
     user: User;
 }
 

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { authClient } from '../api/apiClient';
 import { setAuth } from '../utils/auth';
 
@@ -16,8 +16,6 @@ export default function Login() {
         setLoading(true);
 
         try {
-            // Usamos <any> aquí para adaptarnos a la estructura real de tu backend
-            // sin que TypeScript se queje si no has actualizado types.ts
             const response = await authClient.post<any>('/auth/login', {
                 email,
                 password,
@@ -25,28 +23,21 @@ export default function Login() {
 
             console.log("🔍 DATOS RECIBIDOS DEL BACKEND:", response.data);
 
-            // --- CORRECCIÓN CLAVE ---
-            // Tu backend devuelve: { tokens: { accessToken: "..." }, user: { ... } }
             const { tokens, user } = response.data;
             const accessToken = tokens?.accessToken;
 
-            // 1. Validar que el token exista realmente
             if (!accessToken) {
                 console.error("❌ Estructura inesperada. Se recibió:", response.data);
                 throw new Error("Error interno: El servidor no devolvió el token en la ruta esperada (tokens.accessToken).");
             }
 
-            // 2. Validar que el usuario sea SYSTEM_ADMIN
             if (user?.role !== 'SYSTEM_ADMIN') {
                 setError('Acceso denegado. Solo usuarios SYSTEM_ADMIN pueden acceder a este panel.');
                 setLoading(false);
                 return;
             }
 
-            // 3. Guardar token CORRECTO y rol en LocalStorage
             setAuth(accessToken, user.role);
-
-            // 4. Redireccionar al dashboard
             navigate('/dashboard');
 
         } catch (err: any) {
@@ -61,9 +52,7 @@ export default function Login() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 px-4">
             <div className="max-w-md w-full">
-                {/* Card */}
                 <div className="card animate-fade-in">
-                    {/* Logo/Icon */}
                     <div className="flex justify-center mb-6">
                         <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
                             <svg className="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +61,6 @@ export default function Login() {
                         </div>
                     </div>
 
-                    {/* Title */}
                     <h1 className="text-3xl font-bold text-center text-gray-900 mb-2">
                         Panel Administrativo
                     </h1>
@@ -80,14 +68,12 @@ export default function Login() {
                         AutoDiag - Sistema de Gestión
                     </p>
 
-                    {/* Error Alert */}
                     {error && (
                         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                             <p className="text-sm text-red-800">{error}</p>
                         </div>
                     )}
 
-                    {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -138,8 +124,13 @@ export default function Login() {
                         </button>
                     </form>
 
-                    {/* Footer */}
-                    <div className="mt-6 text-center">
+                    <div className="mt-6 text-center space-y-2">
+                        <p className="text-sm text-gray-600">
+                            ¿No tienes cuenta?{' '}
+                            <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+                                Crear cuenta Super Admin
+                            </Link>
+                        </p>
                         <p className="text-sm text-gray-500">
                             Solo para administradores del sistema
                         </p>
